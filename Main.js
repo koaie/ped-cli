@@ -13,23 +13,30 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         type: 'string',
         nargs: 1
     })
-    .option('dm',{
+    .option('dm', {
+        alias: 'direct-message',
         describe: '[USER_ID] [MSG]',
         type: 'string',
         nargs: 2
     })
-    .option('fl',{
+    .option('cm', {
+        alias: 'channel-message',
+        describe: '[CHANNEL_ID] [MSG]',
+        type: 'string',
+        nargs: 2
+    })
+    .option('fl', {
         alias: 'friend-list',
         describe: 'returns friend list',
         nargs: 0
     })
-    .option('cl',{
+    .option('cl', {
         alias: 'channel-list',
         describe: 'returns all messages from channel',
         type: 'string',
         nargs: 1
     })
-    .option('sa',{
+    .option('sa', {
         alias: 'set-activity',
         describe: 'sets activity [NAME]] [ACTION] [URL]',
         type: 'string',
@@ -62,12 +69,12 @@ const importFile = (path) =>
 
 const createMissingDir = (path) =>
 {
-  if (!fs.existsSync(path))
-  {
-    console.log(`Couldnt find the folder ${path} creating now`);
-    fs.mkdirSync(path);
-  }
-}
+    if (!fs.existsSync(path))
+    {
+        console.log(`Couldnt find the folder ${path} creating now`);
+        fs.mkdirSync(path);
+    }
+};
 
 
 const login = async (token) =>
@@ -104,26 +111,56 @@ const login = async (token) =>
     }
 };
 
-const sendDirectMsg = async(user, msg) =>
+const sendChannelMsg = async (channel, msg) =>
 {
-  client.users.fetch(`${user}`).then(user =>
-  {
-    user.send(msg).catch(err =>
-      {
-      let errReq = { 
-       "type": "dm",
-       "user": user,
-       "msg": msg,
-       "error": err };
+    client.channels.cache.get(channel).send(msg).catch(err =>
+    {
+        let errReq = {
+            "type": "dm",
+            "channel": channel,
+            "msg": msg,
+            "error": err
+        };
 
-      console.log(`${err}`); //Output request
-      fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
-      });
+        console.log(`${err}`); //Output request
+        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
+    });
+    let msgReq = {
+        "type": "cm",
+        "channel": channel,
+        "msg": msg
+    };
 
-      console.log(`${JSON.stringify({"user": user, "msg": msg}, null, 0)}`); //Output request
-      fs.appendFileSync(`${LOG_PATH}/dm.log`, `${JSON.stringify({"user": user, "msg": msg}, null, 0)}\n`); //Write request to log
-  });
-}
+    console.log(`${JSON.stringify((msgReq), null, 0)}`); //Output request
+    fs.appendFileSync(`${LOG_PATH}/dm.log`, `${JSON.stringify(msgReq, null, 0)}\n`); //Write request to log
+};
+
+const sendDirectMsg = async (user, msg) =>
+{
+    client.users.fetch(`${user}`).then(user =>
+    {
+        user.send(msg).catch(err =>
+        {
+            let errReq = {
+                "type": "dm",
+                "user": user,
+                "msg": msg,
+                "error": err
+            };
+
+            console.log(`${err}`); //Output request
+            fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
+        });
+        let msgReq = {
+            "type": "cm",
+            "user": user,
+            "msg": msg
+        };
+
+        console.log(`${JSON.stringify(msgReq, null, 0)}`); //Output request
+        fs.appendFileSync(`${LOG_PATH}/dm.log`, `${JSON.stringify(msgReq, null, 0)}\n`); //Write request to log
+    });
+};
 
 
 const main = async () =>
@@ -138,7 +175,11 @@ const main = async () =>
 
     if (argv.dm)
     {
-        createMissingDir(LOG_PATH);
+        sendDirectMsg(`${argv.dm[0]}`,`${argv.dm[1]}`);
+    }
+    if (argv.cm)
+    {
+        sendChannelMsg(`${argv.cm[0]}`,`${argv.cm[1]}`);
     }
     if (argv.fl)
     {
@@ -150,7 +191,7 @@ const main = async () =>
     }
     if (argv.sa)
     {
-        await client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}`});
+        await client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
 
     }
 };
