@@ -1,0 +1,29 @@
+{
+  "name": "ped-cli",
+  "version": "0.0.1",
+  "description": "Pretty and efficent discord, cli client",
+  "Main": "Main.js",
+  "scripts": {
+    "test": "node Main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koaie/ped-cli.git"
+  },
+  "keywords": [
+    "discordjs",
+    "cli",
+    "discord",
+    "client"
+  ],
+  "author": "koa",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/koaie/ped-cli/issues"
+  },
+  "homepage": "https://github.com/koaie/ped-cli#readme",
+  "dependencies": {
+    "discord.js": "koaie/discord.js#master",
+    "yargs": "^16.1.0"
+  }
+}
