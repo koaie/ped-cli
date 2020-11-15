@@ -38,9 +38,19 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         type: 'string',
         nargs: 1
     })
+    .option('sl', {
+        alias: 'server-list',
+        describe: 'returns all joined servers'
+    })
     .option('fu', {
         alias: 'find-user',
-        describe: 'returns userid',
+        describe: 'returns [{userID, match}]',
+        type: 'string',
+        nargs: 1
+    })
+    .option('fs', {
+        alias: 'find-server',
+        describe: 'returns [{serverID, match}]',
         type: 'string',
         nargs: 1
     })
@@ -170,40 +180,74 @@ const sendDirectMsg = async (user, msg) =>
     });
 };
 
-const sortObjectEntries = (obj) =>
+const sortObjectEntries = (arr) =>
 {
-    console.log(obj)
-    return Object.entries(obj).sort((a, b) => b[1] - a[1]);
+
+    const uniqueArray = arr.filter((v, i, a) => a.findIndex(t => (t.member.user.id === v.member.user.id)) === i);
+    return uniqueArray.sort((a, b) => b.results - a.results);
+};
+
+const getServers = async () =>
+{
+    let servers = [];
+    client.guilds.cache.forEach(server =>
+    {
+        servers.push(server);
+    });
+    return servers;
+};
+
+
+const findServer = async (name) =>
+{
+    let MIN_MATCH = 80;
+    let servers = [];
+    client.guilds.cache.forEach(server =>
+    {
+        const list = client.guilds.cache.get(server.id);
+
+        let results = fuzz.partial_ratio(server.name, name);
+        if (results > MIN_MATCH)
+        {
+            servers.push({ server, results: results });
+        }
+    });
+    return servers.sort((a, b) => b.results - a.results);
 };
 
 const findID = async (name) =>
 {
-    let MIN_MATCH = 50;
-    let users = {};
+    let MIN_MATCH = 80;
+    let users = [];
     client.guilds.cache.forEach(server =>
     {
         const list = client.guilds.cache.get(server.id);
         list.members.cache.forEach((member) =>
         {
-            let results = fuzz.ratio(member.user.username, name);
-            let nicResults;
-            if (member.nickname == !null)
+            const results = fuzz.partial_ratio(member.user.username, name);
+            if (member.nickname !== null)
             {
-                nicResults = fuzz.ratio(member.nickname, name);
+                const nicResults = fuzz.partial_ratio(member.nickname, name);
                 if (results > MIN_MATCH || nicResults > MIN_MATCH)
                 {
-                    users[member] = results + nicResults;
+                    if (nicResults > results)
+                        users.push({ member, results: nicResults });
+                    else
+                    {
+                        users.push({ member, results: results });
+                    }
                 }
             }
             else
             {
                 if (results > MIN_MATCH)
                 {
-                    users[member] = results;
+                    users.push({ member, results: results });
                 }
             }
         });
     });
+
     return sortObjectEntries(users);
 };
 
@@ -243,22 +287,45 @@ const main = async () =>
     }
     if (argv.cl)
     {
-        //client.user.setActivity("cutest koala", { type: "STREAMING", url: "https://www.twitch.tv/koa"});
+        getServers();
+
     }
     if (argv.sa)
     {
         client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
     }
+    if (argv.sl)
+    {
+        await getServers().forEach((server) =>
+        {
+            console.log(server.name);
+        });
+    }
     if (argv.fu)
     {
         let results = await findID(argv.fu);
-
-        for(let i =0;i<results.length;i++)
+        for (let i = 0; i < results.length; i++)
         {
-            console.log(results[i]);
-        }   
+            if (results[i].member.nickname !== null)
+            {
+                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} (${results[i].member.nickname}) results: ${results[i].results}`);
+            }
+            else
+            {
+                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} results: ${results[i].results}`);
+            }
+        }
     }
+    if (argv.fs)
+    {
+        let results = await findServer(argv.fs);
+        for (let i = 0; i < results.length; i++)
+        {
 
+            console.log(`${results[i].server.name} results: ${results[i].results}`);
+        }
+    }
+    process.exit(0);
 };
 
 
