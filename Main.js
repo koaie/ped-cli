@@ -11,25 +11,25 @@ const fuzz = require('fuzzball');
 const client = new Client(); // Discord client
 var argv = require('yargs/yargs')(process.argv.slice(2))
     .option('login', {
-        describe: '[TOKEN]',
+        describe: 'enter user/bot token | [TOKEN]',
         type: 'string',
         nargs: 1
     })
     .option('dm', {
         alias: 'direct-message',
-        describe: '[USER_ID] [MSG]',
+        describe: 'send a message to a user | [USER_ID] [MSG]',
         type: 'string',
         nargs: 2
     })
     .option('cm', {
         alias: 'channel-message',
-        describe: '[CHANNEL_ID] [MSG]',
+        describe: 'send a message to a channel | [CHANNEL_ID] [MSG]',
         type: 'string',
         nargs: 2
     })
     .option('cl', {
         alias: 'channel-list',
-        describe: 'returns all messages from channel',
+        describe: 'returns all channels of a server | [SERVER_ID] ',
         type: 'string',
         nargs: 1
     })
@@ -39,19 +39,19 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
     })
     .option('fu', {
         alias: 'find-user',
-        describe: 'returns [{userID, match}]',
+        describe: 'returns all similar users  | [TEXT]',
         type: 'string',
         nargs: 1
     })
     .option('fs', {
         alias: 'find-server',
-        describe: 'returns [{serverID, match}]',
+        describe: 'returns all similar servers  | [TEXT]',
         type: 'string',
         nargs: 1
     })
     .option('sa', {
         alias: 'set-activity',
-        describe: 'sets activity [NAME]] [ACTION] [URL]',
+        describe: 'sets activity | [TEXT] [ACTION] [URL]',
         type: 'string',
         nargs: 3
     })
@@ -256,6 +256,7 @@ const main = async () =>
     }
     if (argv.sa)
     {
+        // FIXME: set acivity currently does not realibly work
         client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
     }
     if (argv.sl)
@@ -289,7 +290,7 @@ const main = async () =>
             servers.forEach((server) => {
                 const results = server.results;
                 server = server.server;
-                
+
                 console.log(`${server.name} results: ${results}`);
             });
         });
