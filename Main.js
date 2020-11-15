@@ -206,7 +206,7 @@ const findServer = async (name) =>
     {
         const list = client.guilds.cache.get(server.id);
 
-        let results = fuzz.partial_ratio(server.name, name);
+        let results = fuzz.partial_token_sort_ratio(server.name, name);
         if (results > MIN_MATCH)
         {
             servers.push({ server, results: results });
@@ -224,10 +224,10 @@ const findID = async (name) =>
         const list = client.guilds.cache.get(server.id);
         list.members.cache.forEach((member) =>
         {
-            const results = fuzz.partial_ratio(member.user.username, name);
+            const results = fuzz.partial_token_sort_ratio(member.user.username, name);
             if (member.nickname !== null)
             {
-                const nicResults = fuzz.partial_ratio(member.nickname, name);
+                const nicResults = fuzz.partial_token_sort_ratio(member.nickname, name);
                 if (results > MIN_MATCH || nicResults > MIN_MATCH)
                 {
                     if (nicResults > results)
