@@ -246,13 +246,13 @@ const main = async () =>
     }
     if (argv.cl)
     {
-        console.log(client.guilds.cache.get(`${argv.cl}`).channels.cache.forEach((channel) =>
+        client.guilds.cache.get(`${argv.cl}`).channels.cache.forEach((channel) =>
         {
             if (channel.type === 'text')
             {
                 console.log(channel.id, channel.name);
             }
-        }));
+        });
     }
     if (argv.sa)
     {
@@ -267,27 +267,32 @@ const main = async () =>
     }
     if (argv.fu)
     {
-        let results = await findID(argv.fu);
-        for (let i = 0; i < results.length; i++)
-        {
-            if (results[i].member.nickname !== null)
-            {
-                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} (${results[i].member.nickname}) ${results[i].member.user.id} ${results[i].results}`);
-            }
-            else
-            {
-                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} ${results[i].member.user.id} ${results[i].results}`);
-            }
-        }
+        await findID(argv.fu).then((users) => {
+            users.forEach((user) => {
+                const results = user.results;
+                const member = user.member;
+                user = user.member.user;
+                if (member.nickname !== null)
+                {
+                    console.log(`${user.username}#${user.discriminator} (${member.nickname}) ${user.id} ${results}`);
+                }
+                else
+                {
+                    console.log(`${user.username}#${user.discriminator} ${user.id} ${results}`);
+                }
+            });
+        } );
     }
     if (argv.fs)
     {
-        let results = await findServer(argv.fs);
-        for (let i = 0; i < results.length; i++)
-        {
-
-            console.log(`${results[i].server.name} results: ${results[i].results}`);
-        }
+        await findServer(argv.fs).then((servers) => {
+            servers.forEach((server) => {
+                const results = server.results;
+                server = server.server;
+                
+                console.log(`${server.name} results: ${results}`);
+            });
+        });
     }
     process.exit(0);
 };
