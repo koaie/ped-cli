@@ -1,6 +1,6 @@
 {
   "name": "ped-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Pretty and efficent discord, cli client",
   "Main": "Main.js",
   "scripts": {
