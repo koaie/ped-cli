@@ -131,7 +131,7 @@ const login = async (token) =>
 
 const sendChannelMsg = async (channel, msg) =>
 {
-    client.channels.cache.get(channel).send(msg).catch(err =>
+    client.channels.cache.get(`${channel}`).send(msg).catch(err =>
     {
         let errReq = {
             "type": "cm",
@@ -272,6 +272,7 @@ const main = async () =>
         login(argv.login);
     }
     await login();
+    const servers = await getServers();
 
     if (argv.dm)
     {
@@ -287,8 +288,13 @@ const main = async () =>
     }
     if (argv.cl)
     {
-        getServers();
-
+        console.log(client.guilds.cache.get(`${argv.cl}`).channels.cache.forEach((channel) =>
+        {
+            if (channel.type === 'text')
+            {
+                console.log(channel.id, channel.name);
+            }
+        }));
     }
     if (argv.sa)
     {
@@ -296,9 +302,9 @@ const main = async () =>
     }
     if (argv.sl)
     {
-        await getServers().forEach((server) =>
+        servers.forEach((server) =>
         {
-            console.log(server.name);
+            console.log(server.id, server.name);
         });
     }
     if (argv.fu)
@@ -308,11 +314,11 @@ const main = async () =>
         {
             if (results[i].member.nickname !== null)
             {
-                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} (${results[i].member.nickname}) results: ${results[i].results}`);
+                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} (${results[i].member.nickname}) ${results[i].member.user.id} ${results[i].results}`);
             }
             else
             {
-                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} results: ${results[i].results}`);
+                console.log(`${results[i].member.user.username}#${results[i].member.user.discriminator} ${results[i].member.user.id} ${results[i].results}`);
             }
         }
     }
