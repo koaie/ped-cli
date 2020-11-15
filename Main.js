@@ -62,6 +62,8 @@ const ACTIVE_PATH = __dirname; // Active directory
 const LOG_PATH = `./logs`; // Log directory
 const CONFIG_PATH = `./config.json`; // Config path
 
+// Global vars
+const MIN_MATCH = 80;
 
 // Set global variables
 var CONFIG = new Object();
@@ -126,42 +128,19 @@ const login = async (token) =>
 
 const sendChannelMsg = async (channel, msg) =>
 {
-    client.channels.cache.get(`${channel}`).send(msg).catch(err =>
+    return client.channels.cache.get(`${channel}`, true, false).send(msg).catch(err =>
     {
-        let errReq = {
-            "type": "cm",
-            "channel": channel,
-            "msg": msg,
-            "error": err
-        };
-
         console.log(`${err}`); //Output request
-        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
+        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
     });
-    let msgReq = {
-        "type": "cm",
-        "channel": channel,
-        "msg": msg
-    };
-
-    console.log(`${JSON.stringify((msgReq), null, 0)}`); //Output request
-    fs.appendFileSync(`${LOG_PATH}/dm.log`, `${JSON.stringify(msgReq, null, 0)}\n`); //Write request to log
 };
 
 const sendDirectMsg = async (user, msg) =>
 {
     return client.users.cache.get(`${user}`, true, false).send(msg).catch(err =>
     {
-
-        let errReq = {
-            "type": "dm",
-            "user": user,
-            "msg": msg,
-            "error": err
-        };
-
         console.log(`${err}`); //Output request
-        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
+        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
     });
 };
 
@@ -174,12 +153,7 @@ const sortObjectEntries = (arr) =>
 
 const getServers = async () =>
 {
-    let servers = [];
-    client.guilds.cache.forEach(server =>
-    {
-        servers.push(server);
-    });
-    return servers;
+    return client.guilds.cache;
 };
 
 
@@ -202,7 +176,6 @@ const findServer = async (name) =>
 
 const findID = async (name) =>
 {
-    let MIN_MATCH = 80;
     let users = [];
     client.guilds.cache.forEach(server =>
     {
@@ -262,12 +235,14 @@ const main = async () =>
     if (argv.dm)
     {
       await sendDirectMsg(`${argv.dm[0]}`, `${argv.dm[1]}`).then((msg) =>{
-          console.log(`${msg.channel.type} to ${msg.channel.recipient.username}${msg.channel.recipient.discriminator} "${msg.content}"`);
+          console.log(`${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
       });
     }
     if (argv.cm)
     {
-        sendChannelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`);
+        await sendChannelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`).then((msg) =>{
+            console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
+        });
     }
     if (argv.cl)
     {
