@@ -3,6 +3,8 @@ const fs = require(`fs`); // File server
 const { Client } = require(`discord.js`); // Discord's API implementation
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
+const readlineSync = require('readline-sync');
+const fuzz = require('fuzzball');
 
 
 // Initiate dependencies
@@ -33,6 +35,12 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
     .option('cl', {
         alias: 'channel-list',
         describe: 'returns all messages from channel',
+        type: 'string',
+        nargs: 1
+    })
+    .option('fu', {
+        alias: 'find-user',
+        describe: 'returns userid',
         type: 'string',
         nargs: 1
     })
@@ -94,7 +102,7 @@ const login = async (token) =>
             CONFIG.token = "";
             console.log(`Saving default token and exiting...`);
             fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2));
-            process.exit(1);
+            process.exit(0);
         }
     }
     if (String(CONFIG.token).startsWith("mfa."))
@@ -116,7 +124,7 @@ const sendChannelMsg = async (channel, msg) =>
     client.channels.cache.get(channel).send(msg).catch(err =>
     {
         let errReq = {
-            "type": "dm",
+            "type": "cm",
             "channel": channel,
             "msg": msg,
             "error": err
@@ -162,6 +170,56 @@ const sendDirectMsg = async (user, msg) =>
     });
 };
 
+const sortObjectEntries = (obj) =>
+{
+    console.log(obj)
+    return Object.entries(obj).sort((a, b) => b[1] - a[1]);
+};
+
+const findID = async (name) =>
+{
+    let MIN_MATCH = 50;
+    let users = {};
+    client.guilds.cache.forEach(server =>
+    {
+        const list = client.guilds.cache.get(server.id);
+        list.members.cache.forEach((member) =>
+        {
+            let results = fuzz.ratio(member.user.username, name);
+            let nicResults;
+            if (member.nickname == !null)
+            {
+                nicResults = fuzz.ratio(member.nickname, name);
+                if (results > MIN_MATCH || nicResults > MIN_MATCH)
+                {
+                    users[member] = results + nicResults;
+                }
+            }
+            else
+            {
+                if (results > MIN_MATCH)
+                {
+                    users[member] = results;
+                }
+            }
+        });
+    });
+    return sortObjectEntries(users);
+};
+
+const prompt = (query) =>
+{
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    return new Promise(resolve => rl.question(query, ans =>
+    {
+        rl.close();
+        resolve(ans);
+    }));
+};
 
 const main = async () =>
 {
@@ -171,15 +229,13 @@ const main = async () =>
     }
     await login();
 
-
-
     if (argv.dm)
     {
-        sendDirectMsg(`${argv.dm[0]}`,`${argv.dm[1]}`);
+        sendDirectMsg(`${argv.dm[0]}`, `${argv.dm[1]}`);
     }
     if (argv.cm)
     {
-        sendChannelMsg(`${argv.cm[0]}`,`${argv.cm[1]}`);
+        sendChannelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`);
     }
     if (argv.fl)
     {
@@ -191,9 +247,18 @@ const main = async () =>
     }
     if (argv.sa)
     {
-        await client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
-
+        client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
     }
+    if (argv.fu)
+    {
+        let results = await findID(argv.fu);
+
+        for(let i =0;i<results.length;i++)
+        {
+            console.log(results[i]);
+        }   
+    }
+
 };
 
 
