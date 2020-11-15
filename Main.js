@@ -27,11 +27,6 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         type: 'string',
         nargs: 2
     })
-    .option('fl', {
-        alias: 'friend-list',
-        describe: 'returns friend list',
-        nargs: 0
-    })
     .option('cl', {
         alias: 'channel-list',
         describe: 'returns all messages from channel',
@@ -155,28 +150,18 @@ const sendChannelMsg = async (channel, msg) =>
 
 const sendDirectMsg = async (user, msg) =>
 {
-    client.users.fetch(`${user}`).then(user =>
+    return client.users.cache.get(`${user}`, true, false).send(msg).catch(err =>
     {
-        user.send(msg).catch(err =>
-        {
-            let errReq = {
-                "type": "dm",
-                "user": user,
-                "msg": msg,
-                "error": err
-            };
 
-            console.log(`${err}`); //Output request
-            fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
-        });
-        let msgReq = {
-            "type": "cm",
+        let errReq = {
+            "type": "dm",
             "user": user,
-            "msg": msg
+            "msg": msg,
+            "error": err
         };
 
-        console.log(`${JSON.stringify(msgReq, null, 0)}`); //Output request
-        fs.appendFileSync(`${LOG_PATH}/dm.log`, `${JSON.stringify(msgReq, null, 0)}\n`); //Write request to log
+        console.log(`${err}`); //Output request
+        fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(errReq, null, 0)}\n`); //Write request to error log
     });
 };
 
@@ -276,15 +261,13 @@ const main = async () =>
 
     if (argv.dm)
     {
-        sendDirectMsg(`${argv.dm[0]}`, `${argv.dm[1]}`);
+      await sendDirectMsg(`${argv.dm[0]}`, `${argv.dm[1]}`).then((msg) =>{
+          console.log(`${msg.channel.type} to ${msg.channel.recipient.username}${msg.channel.recipient.discriminator} "${msg.content}"`);
+      });
     }
     if (argv.cm)
     {
         sendChannelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`);
-    }
-    if (argv.fl)
-    {
-        console.log("// TODO implmeant friendlist");
     }
     if (argv.cl)
     {
