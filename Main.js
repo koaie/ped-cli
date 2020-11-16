@@ -40,16 +40,13 @@ const main = async () =>
             CONFIG.token = token;
             fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2));
         }
-
     }
 
-        CONFIG = file.import(CONFIG_PATH);
-        await user.login(CONFIG.token).catch((err) => {
-            return Error(err);
-            process.exit(0);
-        });
-    
-    
+    CONFIG = file.import(CONFIG_PATH);
+    await user.login(CONFIG.token).catch((err) => {
+        return Error(err);
+        process.exit(0);
+    });
     const servers = await server.cache();
 
     if (argv.dm)
