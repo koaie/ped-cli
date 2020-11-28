@@ -61,16 +61,17 @@ class User
         return client.users.cache.get(`${user}`, true, false).send(msg).catch(err =>
         {
             console.log(`${err}`); //Output request
-            fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
         });
     };
 
     channelMsg = async (channel, msg) =>
     {
+        await client.channels.fetch(`${channel}`);
         return client.channels.cache.get(`${channel}`, true, false).send(msg).catch(err =>
         {
             console.log(`${err}`); //Output request
-            fs.appendFileSync(`${LOG_PATH}/err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
         });
     };
 }

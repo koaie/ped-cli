@@ -52,12 +52,14 @@ const main = async () =>
     if (argv.dm)
     {
       await user.directMsg(`${argv.dm[0]}`, `${argv.dm[1]}`).then((msg) =>{
-          console.log(`${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
+            if(msg != null) 
+            console.log(`${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
       });
     }
     if (argv.cm)
     {
         await user.channelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`).then((msg) =>{
+            if(msg != null) 
             console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
         });
     }
