@@ -24,18 +24,15 @@ const CONFIG_PATH = `./config.json`; // Config path
 
 
 // Set global variables
-global.CONFIG = new Object(); 
+global.CONFIG = new Object();
 global.MIN_MATCH = 80;
 
 
-const main = async () =>
-{
+const main = async () => {
     file.createDir(CONFIG_PATH);
-    if (argv.login)
-    {
+    if (argv.login) {
         const token = argv.login;
-        if (token != null)
-        {
+        if (token != null) {
             console.log(`Saving new token...`);
             CONFIG.token = token;
             fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2));
@@ -49,69 +46,71 @@ const main = async () =>
     });
     const servers = await server.cache();
 
-    if (argv.dm)
-    {
-      await user.directMsg(`${argv.dm[0]}`, `${argv.dm[1]}`).then((msg) =>{
-            if(msg != null) 
-            console.log(`${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
-      });
-    }
-    if (argv.cm)
-    {
-        await user.channelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`).then((msg) =>{
-            if(msg != null) 
-            console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
+    if (argv.dm) {
+        await user.directMsg(`${argv.dm[0]}`, `${argv.dm[1]}`).then((msg) => {
+            if (msg != null)
+                console.log(`${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
         });
     }
-    if (argv.cl)
-    {
-        client.guilds.cache.get(`${argv.cl}`).channels.cache.forEach((channel) =>
-        {
-            if (channel.type === 'text')
-            {
+    if (argv.cm) {
+        await user.channelMsg(`${argv.cm[0]}`, `${argv.cm[1]}`).then((msg) => {
+            if (msg != null)
+                console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
+        });
+    }
+    if (argv.cl) {
+        client.guilds.cache.get(`${argv.cl}`).channels.cache.forEach((channel) => {
+            if (channel.type === 'text') {
                 console.log(channel.id, channel.name);
             }
         });
     }
-    if (argv.sa)
-    {
+    if (argv.sa) {
         // FIXME: set acivity currently does not realibly work
         client.user.setActivity(`${argv.sa[0]}`, { type: `${argv.sa[1].toUpperCase}`, url: `${argv.sa[2]}` });
     }
-    if (argv.sl)
-    {
-        servers.forEach((server) =>
-        {
+    if (argv.sl) {
+        servers.forEach((server) => {
             console.log(server.id, server.name);
         });
     }
-    if (argv.fu)
-    {
-        await user.search(argv.fu).then((users) => {
+    if (argv.uf) {
+        await user.search(argv.uf).then((users) => {
             users.forEach((user) => {
                 const results = user.results;
                 const member = user.member;
                 user = user.member.user;
-                if (member.nickname !== null)
-                {
+                if (member.nickname !== null) {
                     console.log(`${user.username}#${user.discriminator} (${member.nickname}) ${user.id} ${results}`);
                 }
-                else
-                {
+                else {
                     console.log(`${user.username}#${user.discriminator} ${user.id} ${results}`);
                 }
             });
-        } );
+        });
     }
-    if (argv.fs)
-    {
-        await server.find(argv.fs).then((servers) => {
+    if (argv.sf) {
+        await server.find(argv.sf).then((servers) => {
             servers.forEach((server) => {
                 const results = server.results;
                 server = server.server;
 
                 console.log(`${server.name} results: ${results}`);
             });
+        });
+    }
+    if (argv.crd) {
+        await user.channelRead(argv.crd).then(msgs => {
+            msgs.array().reverse().forEach(msg => {
+                console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
+            })
+        });
+    }
+    if (argv.urd) {
+        await user.directRead(argv.urd).then(msgs => {
+            msgs.array().reverse().forEach(msg => {
+                console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
+            })
         });
     }
     process.exit(0);

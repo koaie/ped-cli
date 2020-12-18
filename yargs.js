@@ -28,15 +28,27 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         alias: 'server-list',
         describe: 'returns all joined servers'
     })
-    .option('fu', {
-        alias: 'find-user',
-        describe: 'returns all similar users  | [TEXT]',
+    .option('crd', {
+        alias: 'channel-read',
+        describe: 'returns all messages from a channel | [CHANNEL_ID] [MESSAGE_QUANTITY]',
+        type: 'string',
+        nargs: 2
+    })
+    .option('urd', {
+        alias: 'user-read',
+        describe: 'returns all messages from a user | [CHANNEL_ID] [MESSAGE_QUANTITY]',
         type: 'string',
         nargs: 1
     })
-    .option('fs', {
-        alias: 'find-server',
+    .option('sf', {
+        alias: 'server-find',
         describe: 'returns all similar servers  | [TEXT]',
+        type: 'string',
+        nargs: 1
+    })
+    .option('uf', {
+        alias: 'user-find',
+        describe: 'returns all similar users  | [TEXT]',
         type: 'string',
         nargs: 1
     })

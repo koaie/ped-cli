@@ -1,50 +1,37 @@
 const fs = require(`fs`); // File server
 const fuzz = require('fuzzball');
 
-class User
-{
-    login = async (token) =>
-    {
-        if (token != null)
-        {
-            await client.login(token).catch((err) =>
-            {
+class User {
+    login = async (token) => {
+        if (token != null) {
+            await client.login(token).catch((err) => {
                 return Error(err);
             });
         }
-        else
-        {
+        else {
             return Error(`Inoccrect token formart detected, exiting...`);
             process.exit(0);
         }
     };
 
-    search = async (name) =>
-    {
+    search = async (name) => {
         let users = [];
-        client.guilds.cache.forEach(server =>
-        {
+        client.guilds.cache.forEach(server => {
             const list = client.guilds.cache.get(server.id);
-            list.members.cache.forEach((member) =>
-            {
+            list.members.cache.forEach((member) => {
                 const results = fuzz.partial_token_sort_ratio(member.user.username, name);
-                if (member.nickname !== null)
-                {
+                if (member.nickname !== null) {
                     const nicResults = fuzz.partial_token_sort_ratio(member.nickname, name);
-                    if (results > MIN_MATCH || nicResults > MIN_MATCH)
-                    {
+                    if (results > MIN_MATCH || nicResults > MIN_MATCH) {
                         if (nicResults > results)
                             users.push({ member, results: nicResults });
-                        else
-                        {
+                        else {
                             users.push({ member, results: results });
                         }
                     }
                 }
-                else
-                {
-                    if (results > MIN_MATCH)
-                    {
+                else {
+                    if (results > MIN_MATCH) {
                         users.push({ member, results: results });
                     }
                 }
@@ -55,21 +42,34 @@ class User
         return uniqueArray.sort((a, b) => b.results - a.results);
     };
 
-    directMsg = async (user, msg) =>
-    {
+    channelRead = async (channel) => {
+        await client.channels.fetch(`${channel}`);
+        return await client.channels.cache.get(`${channel}`, true, false).messages.fetch({ limit: 10 }).catch(err => {
+            console.log(`${err}`); //Output request
+            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+        });
+    }
+
+    directRead = async (user, limit) => {
         await client.users.fetch(`${user}`);
-        return client.users.cache.get(`${user}`, true, false).send(msg).catch(err =>
-        {
+        let dm = await client.users.cache.get(`${user}`, true, false).createDM();
+        return await dm.messages.fetch({ limit: limit }).catch(err => {
+            console.log(`${err}`); //Output request
+            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+        });
+    }
+
+    directMsg = async (user, limit) => {
+        await client.users.fetch(`${user}`);
+        return await client.users.cache.get(`${user}`, true, false).send(msg).catch(err => {
             console.log(`${err}`); //Output request
             fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
         });
     };
 
-    channelMsg = async (channel, msg) =>
-    {
+    channelMsg = async (channel, msg) => {
         await client.channels.fetch(`${channel}`);
-        return client.channels.cache.get(`${channel}`, true, false).send(msg).catch(err =>
-        {
+        return client.channels.cache.get(`${channel}`, true, false).send(msg).catch(err => {
             console.log(`${err}`); //Output request
             fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
         });
