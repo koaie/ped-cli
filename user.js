@@ -42,24 +42,24 @@ class User {
         return uniqueArray.sort((a, b) => b.results - a.results);
     };
 
-    channelRead = async (channel) => {
-        await client.channels.fetch(`${channel}`);
-        return await client.channels.cache.get(`${channel}`, true, false).messages.fetch({ limit: 10 }).catch(err => {
-            console.log(`${err}`); //Output request
-            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
-        });
-    }
-
-    directRead = async (user, limit) => {
+    directRead = async (user, amt) => {
         await client.users.fetch(`${user}`);
         let dm = await client.users.cache.get(`${user}`, true, false).createDM();
-        return await dm.messages.fetch({ limit: limit }).catch(err => {
+        return await dm.messages.fetch({ limit: amt }).catch(err => {
             console.log(`${err}`); //Output request
             fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
         });
     }
 
-    directMsg = async (user, limit) => {
+    channelRead = async (channel, amt) => {
+        await client.channels.fetch(`${channel}`);
+        return await client.channels.cache.get(`${channel}`, true, false).messages.fetch({ limit: amt }).catch(err => {
+            console.log(`${err}`); //Output request
+            fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+        });
+    }
+
+    directMsg = async (user, msg) => {
         await client.users.fetch(`${user}`);
         return await client.users.cache.get(`${user}`, true, false).send(msg).catch(err => {
             console.log(`${err}`); //Output request

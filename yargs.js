@@ -38,7 +38,7 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         alias: 'user-read',
         describe: 'returns all messages from a user | [CHANNEL_ID] [MESSAGE_QUANTITY]',
         type: 'string',
-        nargs: 1
+        nargs: 2
     })
     .option('sf', {
         alias: 'server-find',

@@ -100,14 +100,14 @@ const main = async () => {
         });
     }
     if (argv.crd) {
-        await user.channelRead(argv.crd).then(msgs => {
+        await user.channelRead(argv.crd[0], argv.crd[1]).then(msgs => {
             msgs.array().reverse().forEach(msg => {
                 console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
             })
         });
     }
     if (argv.urd) {
-        await user.directRead(argv.urd).then(msgs => {
+        await user.directRead(argv.urd[0], argv.urd[1]).then(msgs => {
             msgs.array().reverse().forEach(msg => {
                 console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`)
             })
