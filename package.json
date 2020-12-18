@@ -1,6 +1,6 @@
 {
   "name": "ped-cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Pretty and efficent discord, cli client",
   "Main": "Main.js",
   "scripts": {
@@ -20,6 +20,9 @@
   "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/koaie/ped-cli/issues"
+  },
+  "bin": {
+    "ped-cli": "./Main.js"
   },
   "homepage": "https://github.com/koaie/ped-cli#readme",
   "dependencies": {

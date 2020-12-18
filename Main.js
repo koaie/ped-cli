@@ -1,6 +1,6 @@
 // Import dependencies
-const fs = require(`fs`); // File server
-const { Client } = require(`discord.js`); // Discord's API implementation
+const fs = require('fs'); // File server
+const { Client } = require('discord.js'); // Discord's API implementation
 const readlineSync = require('readline-sync');
 
 // Import segerated code

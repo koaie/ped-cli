@@ -1,4 +1,4 @@
-const fs = require(`fs`); // File server
+const fs = require('fs'); // File server
 const fuzz = require('fuzzball');
 
 class User {
