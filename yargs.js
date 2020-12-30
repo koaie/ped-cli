@@ -7,13 +7,13 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         nargs: 1
     })
     .option('dm', {
-        alias: 'direct-message',
+        alias: 'user-send',
         describe: 'send a message to a user | [USER_ID] [MSG]',
         type: 'string',
         nargs: 2
     })
     .option('cm', {
-        alias: 'channel-message',
+        alias: 'channel-send',
         describe: 'send a message to a channel | [CHANNEL_ID] [MSG]',
         type: 'string',
         nargs: 2
@@ -49,6 +49,12 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
     .option('uf', {
         alias: 'user-find',
         describe: 'returns all similar users  | [TEXT]',
+        type: 'string',
+        nargs: 1
+    })
+    .option('rl', {
+        alias: 'roll',
+        describe: 'rolls waifus in channel  | [TEXT]',
         type: 'string',
         nargs: 1
     })

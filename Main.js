@@ -27,6 +27,11 @@ const CONFIG_PATH = `./config.json`; // Config path
 global.CONFIG = new Object();
 global.MIN_MATCH = 80;
 
+function sleep(ms) {
+    // add ms millisecond timeout before promise resolution
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 
 const main = async () => {
     file.createDir(CONFIG_PATH);
@@ -81,10 +86,10 @@ const main = async () => {
                 const member = user.member;
                 user = user.member.user;
                 if (member.nickname !== null) {
-                    console.log(`${user.username}#${user.discriminator} (${member.nickname}) ${user.id} ${results}`);
+                    console.log(`${user.username}#${user.discriminator} (${member.nickname}) ${user.id} <${results}>`);
                 }
                 else {
-                    console.log(`${user.username}#${user.discriminator} ${user.id} ${results}`);
+                    console.log(`${user.username}#${user.discriminator} ${user.id} <${results}>`);
                 }
             });
         });
@@ -95,7 +100,7 @@ const main = async () => {
                 const results = server.results;
                 server = server.server;
 
-                console.log(`${server.name} results: ${results}`);
+                console.log(`(${server.name}) ${server.id} <${results}>`);
             });
         });
     }
@@ -104,11 +109,11 @@ const main = async () => {
             msgs.array().reverse().forEach(msg => {
                 if (msg.attachments.size > 0) {
                     msg.attachments.forEach((attachment) => {
-                        console.log(`${msg.author.username}#${msg.author.discriminator}: ${attachment.url}`);
+                        console.log(`${new Date(msg.createdTimestamp).toLocaleTimeString().replace(/:\d+ /, ' ')} ${msg.author.username}#${msg.author.discriminator}: ${attachment.url}`);
                     })
                 }
                 else {
-                    console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
+                    console.log(`${new Date(msg.createdTimestamp).toLocaleTimeString().replace(/:\d+ /, ' ')} ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
                 }
             })
         });
@@ -118,14 +123,43 @@ const main = async () => {
             msgs.array().reverse().forEach(msg => {
                 if (msg.attachments.size > 0) {
                     msg.attachments.forEach((attachment) => {
-                        console.log(`${msg.author.username}#${msg.author.discriminator}: ${attachment.url}`);
+                        console.log(`${new Date(msg.createdTimestamp).toLocaleTimeString().replace(/:\d+ /, ' ')} ${msg.author.username}#${msg.author.discriminator}: ${attachment.url}`);
                     })
                 }
                 else {
-                    console.log(`${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
+                    console.log(`${new Date(msg.createdTimestamp).toLocaleTimeString().replace(/:\d+ /, ' ')} ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
                 }
             })
         });
+    }
+    if (argv.rl) {
+        while (true) {
+            await user.channelMsg(`${argv.rl}`, `$wa`).then(async (msg) => {
+                if (msg != null) {
+                    console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
+
+                    const filter = m => { 
+                        return m.author.id == 432610292342587392;
+                    };
+
+                    await msg.channel.awaitMessages(filter, { max: 1, time: 6000, errors: ['time'] })
+                        .then(collected => {
+                            collected.forEach(ms =>{
+                                if(ms.content.includes(`${msg.author.username}`) && ms.content.includes(`is limited to`))
+                                {
+                                    process.exit(0);
+                                }
+                            })
+                        })
+                        .catch(collected => {
+                            console.log(JSON.stringify(collected));
+                        });
+                }
+            }).catch(err => {
+                console.log(`${err}`); //Output request
+                fs.appendFileSync(`err.log`, `${JSON.stringify(err, null, 0)}\n`); //Write request to error log
+            });
+        }
     }
     process.exit(0);
 };
