@@ -18,6 +18,18 @@ var argv = require('yargs/yargs')(process.argv.slice(2))
         type: 'string',
         nargs: 2
     })
+    .option('csp', {
+        alias: 'channel-spam',
+        describe: 'send multiple messages to a channel | [CHANNEL_ID] [MSG] [COUNT] [DELAY]',
+        type: 'string',
+        nargs: 4
+    })
+    .option('usp', {
+        alias: 'user-spam',
+        describe: 'send multiple messages to a user | [CHANNEL_ID] [MSG] [COUNT] [DELAY]',
+        type: 'string',
+        nargs: 4
+    })
     .option('cl', {
         alias: 'channel-list',
         describe: 'returns all channels of a server | [SERVER_ID] ',

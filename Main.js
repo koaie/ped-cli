@@ -114,6 +114,7 @@ const main = async () => {
                 }
                 else {
                     console.log(`${new Date(msg.createdTimestamp).toLocaleTimeString().replace(/:\d+ /, ' ')} ${msg.author.username}#${msg.author.discriminator}: ${msg.content}`);
+                    console.log(msg.embeds);
                 }
             })
         });
@@ -138,21 +139,20 @@ const main = async () => {
                 if (msg != null) {
                     console.log(`${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
 
-                    const filter = m => { 
+                    const filter = m => {
                         return m.author.id == 432610292342587392;
                     };
 
-                    await msg.channel.awaitMessages(filter, { max: 1, time: 6000, errors: ['time'] })
+                    await msg.channel.awaitMessages(filter, { max: 1, time: 12000, errors: ['time'] })
                         .then(collected => {
-                            collected.forEach(ms =>{
-                                if(ms.content.includes(`${msg.author.username}`) && ms.content.includes(`is limited to`))
-                                {
+                            collected.forEach(ms => {
+                                if (ms.content.includes(`${client.user.username}`) && ms.content.includes(`is limited to`)) {
                                     process.exit(0);
                                 }
                             })
                         })
                         .catch(collected => {
-                            console.log(JSON.stringify(collected));
+                            console.log("not limited");
                         });
                 }
             }).catch(err => {
@@ -161,8 +161,35 @@ const main = async () => {
             });
         }
     }
+    if (argv.csp) {
+        let max = Number(argv.csp[2]);
+        let delay = Number(argv.csp[3]);
+
+
+        for (let i = 0; i < max || max == 0; i++) {
+
+            await user.channelMsg(`${argv.csp[0]}`, `${argv.csp[1]}`).then((msg) => {
+                if (msg != null)
+                    console.log(`#${i + 1} ${msg.channel.type} to ${msg.channel.name} (${msg.guild.name}) "${msg.content}"`);
+            });
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+
+    if (argv.usp) {
+        let max = Number(argv.usp[2]);
+        let delay = Number(argv.usp[3]);
+
+
+        for (let i = 0; i < max || max == 0; i++) {
+            await user.directMsg(`${argv.usp[0]}`, `${argv.usp[1]}`).then((msg) => {
+                if (msg != null)
+                    console.log(`#${i + 1} ${msg.channel.type} to ${msg.channel.recipient.username}#${msg.channel.recipient.discriminator} "${msg.content}"`);
+            });
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
     process.exit(0);
 };
-
 
 main();
